@@ -679,7 +679,216 @@
                 };
             }
         };
-    }).filter('orderObjectBy', ['$sce', function($sce) {
+    }).directive('search', ['$rootScope', 'DEFAULT_SC', '$mdDateRangePicker', '$location', function ($rootScope, DEFAULT_SC, $mdDateRangePicker, $location) {
+        "use strict";
+        return {
+            restrict: 'E',
+            template: '<div id="search" class="md-row search-element">\n' +
+                '                    <div ng-class="{\'disable-layer\': disableLayer}"></div>\n' +
+                '                    <div class="panel-body">\n' +
+                '                        <div ng-show="expandLayer" layout="row" layout-md="column" layout-sm="column" layout-xs="column">\n' +
+                '                            <div id="search-container" flex="auto">\n' +
+                '                                <div layout="row" layout-xs="column">\n' +
+                '                                    <input type="text" id="search-input" class="form-control pull-left" placeholder="Search items" ng-model="models[fastModel.items[fastModel.currentItemIndex].value]" aria-label="Search items" aria-describedby="basic-addon2">\n' +
+                '                                    <div class="btn-check" layout-xs="row">\n' +
+                '                                        <button ng-repeat="fastItem in fastModel.items" type="button" ng-class="{\'default-gray\': models[fastItem.value] && models[fastItem.value].length != 0, \'active\': fastModel.currentItemIndex == $index}" ng-click="fastModel.currentItemIndex = $index" class="btn btn-default">{{ fastItem.name }}</button>\n' +
+                '                                    </div>\n' +
+                '                                </div>\n' +
+                '                            </div>\n' +
+                '                            <div id="search-select" layout="row" layout-sm="column" layout-xs="column">\n' +
+                '                                <div ng-repeat="block in searchModels" layout="row" layout-xs="{{ block.layout_xs ? block.layout_xs : \'row\' }}">\n' +
+                '                                    <div ng-repeat="element in block.elements" class="searchable select block-control inner-block"  layout="row" layout-xs="{{ element.layout_xs ? element.layout_xs : \'row\' }}">\n' +
+                '                                       <div ng-repeat="innerElement in element.elements" class="searchable select block-control" ng-if="element.elements">\n' +
+            '                                               <input ng-if="innerElement.type == \'input\'" class="inner-input form-control" type="text" ng-model="models[innerElement.model]" name="searchInput" ng-attr-placeholder="{{ innerElement.name }}">\n' +
+            '                                               <md-input-container ng-if="[\'select\'].indexOf(innerElement.type) != -1" class="searchable pull-left" flex="grow">\n' +
+            '                                                   <md-select ng-if="innerElement.type == \'select\'" ng-model="models[innerElement.model]" name="searchSelect" ng-attr-placeholder="{{ innerElement.name }}">\n' +
+            '                                                       <md-option value="" disabled>{{ innerElement.name }}</md-option>\n' +
+            '                                                       <md-option ng-repeat="selectValue in innerElement.values" ng-value="selectValue">{{ selectValue }}</md-option>\n' +
+            '                                                   </md-select>\n' +
+            '                                               </md-input-container>\n' +
+            '                                               <button ng-if="innerElement.type == \'button\'" ng-class="{{ innerElement.class }}" class="pull-left" flex="nogrow" data-ng-class="{\'label-blank\': innerElement.model == null, \'label-primary\': innerElement.model == true}" data-ng-click="innerElement.model = ! innerElement.model" flex="nogrow">{{ innerElement.name }}\n' +
+            '                                                   <md-tooltip ng-if="innerElement.tooltip" md-direction="bottom">{{ innerElement.tooltip }}</md-tooltip>\n' +
+    '                                                       </button>\n' +
+                '                                       </div>\n' +
+                '                                       <input ng-if="element.type == \'input\'" class="inner-input form-control" type="text" ng-model="models[element.model]" name="searchInput" ng-attr-placeholder="{{ element.name }}">\n' +
+                '                                       <md-input-container ng-if="[\'select\'].indexOf(element.type) != -1" class="searchable select pull-left" flex="grow">\n' +
+                '                                           <md-select ng-if="element.type == \'select\'" ng-model="models[element.model]" name="searchSelect" ng-attr-placeholder="{{ element.name }}">\n' +
+                '                                               <md-option value="" disabled>{{ element.name }}</md-option>\n' +
+                '                                               <md-option ng-repeat="selectValue in element.values" ng-value="selectValue">{{ selectValue }}</md-option>\n' +
+                '                                           </md-select>\n' +
+                '                                       </md-input-container>\n' +
+                '                                       <button ng-if="element.type == \'button\'" ng-class="{{ element.class }}" class="pull-left" flex="nogrow" data-ng-class="{\'label-blank\': element.model == null, \'label-primary\': element.model == true}" data-ng-click="models[element.model] = ! models[element.model]" flex="nogrow">{{ element.name }}\n' +
+                '                                           <md-tooltip ng-if="element.tooltip" md-direction="bottom">{{ element.tooltip }}</md-tooltip>\n' +
+                '                                       </button>\n' +
+                '                                       <md-input-container ng-if="element.type == \'date\'" class="date-picker-container pull-left" flex="grow">\n' +
+                '                                           <span data-ng-if="selectedRange.dateStart == null && selectedRange.dateEnd == null"></span>\n' +
+                '                                           <span data-ng-if="selectedRange.dateStart && selectedRange.dateEnd && !isEqualDate()">{{selectedRange.dateStart | date : \'dd MMM\'}} - </span>\n' +
+                '                                           <span>{{selectedRange.dateEnd | date : \'dd MMM\'}}</span>\n' +
+                '                                           <md-button id="searchCalendar" ng-click="pick($event, true)"><i class="material-icons md-18">today</i></md-button>\n' +
+                '                                       </md-input-container>\n' +
+                '                                    </div>\n' +
+                '                                </div>\n' +
+                '                            </div>\n' +
+                '                        </div>\n' +
+                '                    </div>\n' +
+                '                </div>',
+            replace: true,
+            require: 'ngModel',
+            transclude: true,
+            scope: {
+                ngModel: '=',
+                disableLayer: '=?',
+                expandLayer: '&?',
+                fastModel: '=',
+                searchModels: '=',
+                insertIntoQueryParam: '&?',
+                clear: '='
+            },
+            link: function(scope, elm, attrs, ngModel) {
+
+                if (!attrs.disableLayer) { scope.disableLayer = false; }
+                if (!attrs.expandLayer) { scope.expandLayer = true; }
+                if (!attrs.insertIntoQueryParam) { scope.insertIntoQueryParam = true; }
+
+                scope.sc = angular.copy(DEFAULT_SC);
+
+                scope.models = {};
+
+                scope.getFieldElements = function(block) {
+                    return block.filter(function (element) {
+                        return element.name;
+                    })
+                };
+
+                scope.onChangeCriteria = function () {
+                    collectSearchCriterias(scope.models);
+                    for(var criteria in scope.sc) {
+                        if(!scope.sc[criteria] || scope.sc[criteria].length == 0) {
+                            delete scope.sc[criteria];
+                        }
+                    }
+                    if(scope.insertIntoQueryParam) {
+                        $location.search(scope.sc);
+                    }
+                };
+
+                scope.$watchGroup(getAllModels().map(function (model) {
+                    return 'models.' + model;
+                }).concat(['selectedRange']), function (fastSearchArray) {
+                    var notEmptyValues = fastSearchArray.filter(function(value) {
+                        return value != undefined && (value.length > 0 || new Date(value) ||  value.$$hashKey || value === true);
+                    });
+                    scope.onChangeCriteria();
+                    fillDateSc(scope.selectedRange);
+                    ngModel.$setViewValue(scope.sc);
+                    scope.searchFormIsEmpty = notEmptyValues.length == 0;
+                });
+
+                scope.$watch('clear', function (newVal) {
+                    if(newVal) {
+                        clearDateRangePicker();
+                        scope.sc = angular.copy(DEFAULT_SC);
+                        scope.models = getAllModels();
+                        elm.attrs.clear.value = false;
+                    }
+                });
+
+                function collectSearchCriterias(models) {
+                    models.forEach(function (model) {
+                        scope.sc[model] = scope.models[model];
+                    });
+                };
+
+                function collectSearchModels() {
+                    var result = [];
+                    scope.searchModels.forEach(function (model) {
+                        model.elements.forEach(function (subModel) {
+                            if(subModel.name) {
+                                result.push(subModel.model);
+                            } else {
+                                subModel.elements.forEach(function (subsubModel) {
+                                    result.push(subsubModel.model);
+                                });
+                            }
+                        });
+                    });
+                    return result;
+                };
+
+                function collectFastModels() {
+                    var result = [];
+                    scope.fastModel.items.map(function (item) {
+                        return item.value;
+                    }).forEach(function (value) {
+                        result.push(value);
+                    });
+                    return result;
+                };
+
+                function getAllModels() {
+                    scope.models = collectFastModels().concat(collectSearchModels());
+                    return scope.models;
+                };
+
+                /**
+                 DataRangePicker functionality
+                 */
+
+                var tmpToday = new Date();
+                scope.selectedRange = {
+                    selectedTemplate: null,
+                    selectedTemplateName: null,
+                    dateStart: null,
+                    dateEnd: null,
+                    showTemplate: false,
+                    fullscreen: false
+                };
+
+                scope.onSelect = function(scope) {
+                    return scope.selectedRange.selectedTemplateName;
+                };
+
+                scope.pick = function($event, showTemplate) {
+                    scope.selectedRange.showTemplate = showTemplate;
+                    $mdDateRangePicker.show({
+                        targetEvent: $event,
+                        model: scope.selectedRange
+                    }).then(function(result) {
+                        if (result) {
+                            scope.selectedRange = result;
+                        }
+                    })
+                };
+
+                function clearDateRangePicker() {
+                    scope.selectedRange.selectedTemplate = null;
+                    scope.selectedRange.selectedTemplateName = null;
+                    scope.selectedRange.dateStart = null;
+                    scope.selectedRange.dateEnd = null;
+                };
+
+                function fillDateSc(selectedRange) {
+                    if (selectedRange.dateStart && selectedRange.dateEnd) {
+                        if(! isEqualDate(selectedRange)){
+                            scope.sc.fromDate = selectedRange.dateStart;
+                            scope.sc.toDate = selectedRange.dateEnd;
+                        }
+                        else {
+                            scope.sc.date = selectedRange.dateStart;
+                        }
+                    }
+                };
+
+                function isEqualDate(selectedRange) {
+                    return selectedRange.dateStart && selectedRange.dateEnd && selectedRange.dateStart.getTime() === selectedRange.dateEnd.getTime();
+                };
+
+                scope.isFuture = function($date) {
+                    return $date.getTime() < new Date().getTime();
+                };
+            }
+        };
+    }]).filter('orderObjectBy', ['$sce', function($sce) {
         var STATUSES_ORDER = {
             'PASSED': 0,
             'FAILED': 1,

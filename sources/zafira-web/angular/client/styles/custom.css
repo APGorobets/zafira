@@ -3,15 +3,19 @@
         width: 100% !important;
     }
 
-    #search-container, .filter-text div, .filter-name, .filter-input-container, .filter-select-container, #search .searchable.select, .date-picker-container {
+    #search-container, .filter-text div, .filter-name, .filter-input-container, .filter-select-container, #search md-input-container.searchable.select, .searchable.select.block-control.inner-block, .searchable.select.block-control:not(.inner-block):last-child, .date-picker-container {
         margin: 0 0 8px 0 !important;
+    }
+
+    .searchable.select.block-control:not(.inner-block):not(:last-child) {
+        margin: 0 8px 8px 0 !important;
     }
 
     .filter-text {
         padding-bottom: 0;
     }
 
-    #search-container .form-control {
+    #search input.form-control {
         width: 100% !important;
         padding-right: 12px;
     }
@@ -62,7 +66,7 @@
     #search-container {
         margin-bottom: 8px !important;
     }
-    #search-container .form-control {
+    search input.form-control {
         width: 100% !important;
     }
     .btn-check {
@@ -80,7 +84,7 @@
     .value-input, button#add-button {
       margin-top: 16px !important;
     }
-    #search md-input-container.date-picker-container{
+    #search:not(.search-element) md-input-container.date-picker-container{
       margin-top: 8px !important;
       margin-left: 0 !important;
     }

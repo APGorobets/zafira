@@ -19,17 +19,83 @@
     	$scope.sc = angular.copy(DEFAULT_SC);
     	$scope.tests = {};
 
+    	$scope.fastModel = {
+    	    currentItemIndex: 0,
+            items: [
+                {
+                    name: 'ID',
+                    value: 'id'
+                },
+                {
+                    name: 'Test class',
+                    value: 'testClass'
+                }
+            ]
+        };
+
+    	$scope.sc.testMethod = '';
+    	$scope.sc.testSuite = '';
+    	$scope.sc.username = '';
+
+    	$scope.searchModels = [
+            {
+                elements: [
+                    {
+                        name: 'Test method',
+                        type: 'input',
+                        class: '',
+                        model: 'testMethod'
+                    },
+                    {
+                        name: 'Test suite',
+                        type: 'input',
+                        class: '',
+                        model: 'testSuite'
+                    },
+                    {
+                        name: 'Username',
+                        type: 'input',
+                        class: '',
+                        model: 'username'
+                    },
+                    {
+                        name: 'Date',
+                        type: 'date',
+                        model: 'date'
+                    }
+                    /*{
+                        elements: [
+                            {
+                                name: 'Test suite',
+                                type: 'input',
+                                class: '',
+                                model: $scope.sc.testSuite
+                            },
+                            {
+                                name: 'Username',
+                                type: 'input',
+                                class: '',
+                                model: $scope.sc.username
+                            }
+                        ],
+                        layout_xs: ''
+                    }*/
+                ],
+                layout_xs: 'column'
+            }
+        ];
+
     	$scope.search = function (page) {
-            $scope.sc.date = null;
+            /*$scope.sc.date = null;
             $scope.sc.toDate = null;
-            $scope.sc.fromDate = null;
+            $scope.sc.fromDate = null;*/
 
     		if(page)
     		{
     			$scope.sc.page = page;
     		}
 
-            if ($scope.selectedRange.dateStart && $scope.selectedRange.dateEnd) {
+            /*if ($scope.selectedRange.dateStart && $scope.selectedRange.dateEnd) {
                 if(!$scope.isEqualDate()){
                     $scope.sc.fromDate = $scope.selectedRange.dateStart;
                     $scope.sc.toDate = $scope.selectedRange.dateEnd;
@@ -37,7 +103,7 @@
                 else {
                     $scope.sc.date = $scope.selectedRange.dateStart;
                 }
-            }
+            }*/
 
     		TestCaseService.searchTestCases(ProjectProvider.initProjects($scope.sc)).then(function(rs) {
 				if(rs.success)
@@ -51,11 +117,11 @@
 			});
         };
 
-        $scope.isEqualDate = function() {
+        /*$scope.isEqualDate = function() {
             if($scope.selectedRange.dateStart && $scope.selectedRange.dateEnd){
                 return $scope.selectedRange.dateStart.getTime() === $scope.selectedRange.dateEnd.getTime();
             }
-        };
+        };*/
 
         $scope.loadTests = function(testCase) {
 
@@ -77,11 +143,15 @@
 
         };
 
+        $scope.clearSearch = false;
+
         $scope.reset = function () {
-            $scope.selectedRange.dateStart = null;
-            $scope.selectedRange.dateEnd = null;
+            $scope.clearSearch = true;
+           /* $scope.selectedRange.dateStart = null;
+            $scope.selectedRange.dateEnd = null;*/
             $scope.sc = angular.copy(DEFAULT_SC);
         	$scope.search();
+            //$scope.clearSearch = ! $scope.clearSearch;
         };
 
         $scope.getClassName = function(fullName) {
@@ -97,7 +167,7 @@
          DataRangePicker functionality
          */
 
-        var tmpToday = new Date();
+        /*var tmpToday = new Date();
         $scope.selectedRange = {
             selectedTemplate: null,
             selectedTemplateName: null,
@@ -108,7 +178,6 @@
         };
 
         $scope.onSelect = function(scope) {
-            console.log($scope.selectedRange.selectedTemplateName);
             return $scope.selectedRange.selectedTemplateName;
         };
 
@@ -131,7 +200,7 @@
 
         $scope.isFuture = function($date) {
             return $date.getTime() < new Date().getTime();
-        };
+        };*/
 
         (function initController() {
 			$scope.search(1);
