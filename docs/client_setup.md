@@ -1,7 +1,7 @@
 # Client setup 
 
 #### Access token
-Zafira provides REST API to track test automation results (use [Swagger](http://localhost:8080/zafira-ws/swagger-ui.html) to learn API). You have different options of integration of your test client. [Carina automation framework](https://github.com/qaprosoft/carina) has integration with Zafira under the hood. Regardless of integration flow you selected, first of all you will need access token generated. Navigate to **Username** > **Profile** in top navigation menu:
+Zafira provides REST API to track test automation results (use [Swagger](http://localhost:8080/zafira-ws/swagger-ui.html) to learn API). You have different options of integration of your test client. [Carina automation framework](https://github.com/qaprosoft/carina) has integration with Zafira under the hood. Regardless of the integration flow you've selected, first of all you will need an access token generated. Navigate to **Username** > **Profile** in top navigation menu:
 
 <p align="center">
   <img src="../img/menu_profile.png">
@@ -13,7 +13,7 @@ Scroll down and generate new access token:
   <img src="../img/access_token.png">
 </p>
 
-Zafira uses stateless authentication using [JWT](https://en.wikipedia.org/wiki/JSON_Web_Token) technology. In general clients stores refresh token that is used to generate access token with 5-hours expiration term. 
+Zafira uses stateless authentication using [JWT](https://en.wikipedia.org/wiki/JSON_Web_Token) technology. In general, the client stores a refresh token which is used to generate an access token with 5-hours expiration term. 
 ```
 POST /api/auth/refresh
 {
@@ -29,13 +29,13 @@ Response:
 }
 ```
 
-All HTTP calls that requires authorization context should contain header:
+All HTTP calls which require authorization context should contain the following header:
 ```
 Authorizarion: Bearer <auth_token>
 ```
 
 #### Integration with Carina
-Carina automation framework tacks test results in Zafira by default, all you need is valid access token in [zafira.properties](https://github.com/qaprosoft/carina-demo/blob/master/src/main/resources/zafira.properties) file.
+Carina automation framework tacks test results in Zafira by default, all you need is a valid access token in [zafira.properties](https://github.com/qaprosoft/carina-demo/blob/master/src/main/resources/zafira.properties) file.
 ```
 zafira_enabled=true
 zafira_service_url=http://localhost:8080/zafira-ws
@@ -50,14 +50,14 @@ Verify following properties:
 * zafira_enabled=true
 * zafira_service_url=YOUR_ZAFIRA_URL
 
-By default **zafira_project=UNKNOWN** but using admin user you are capable to create multiple projects via Zafira UI (Top menu > Project > Create). When new project is created you may override **zafira_project** property and track results in appropriate context.
+By default **zafira_project=UNKNOWN** but using admin user you are capable of creating multiple projects via Zafira UI (Top menu > Project > Create). When a new project is created you may override **zafira_project** property and track results in the appropriate context.
 
 <p align="center">
   <img src="../img/flow_uml.png">
 </p>
 
 #### Integration with TestNG
-If you are implementing your own TestNG-based automation project you can easily setup integration with Zafira using [TestNG listener](https://github.com/qaprosoft/zafira/blob/master/sources/zafira-client/src/main/java/com/qaprosoft/zafira/listener/ZafiraListener.java).
+If you are implementing your own TestNG-based automation project, you can easily setup integration with Zafira using [TestNG listener](https://github.com/qaprosoft/zafira/blob/master/sources/zafira-client/src/main/java/com/qaprosoft/zafira/listener/ZafiraListener.java).
 
 * Add Zafira client as Maven dependency:
 
@@ -69,8 +69,8 @@ If you are implementing your own TestNG-based automation project you can easily 
 </dependency>
 ```
 
-* Create [zafira.properties](https://github.com/qaprosoft/carina-demo/blob/master/src/main/resources/zafira.properties) and place in resource folder, update configuration
-* Include com.qaprosoft.zafira.listener.ZafiraListener as TestNG listener:
+* Create [zafira.properties](https://github.com/qaprosoft/carina-demo/blob/master/src/main/resources/zafira.properties) and place them in resource folder, update the configuration
+* Include com.qaprosoft.zafira.listener.ZafiraListener as a TestNG listener:
 ```
 <suite>
     [...]
